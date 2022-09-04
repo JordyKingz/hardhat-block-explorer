@@ -60,6 +60,8 @@ function calculateGasPercentage(gasUsed: number, gasLimit: number) {
   <div>
     <div class="mx-auto max-w-7xl">
       <div class="py-12 w-1/2">
+        <RouterLink to="/">Home</RouterLink>
+
         <div>
           <h2 class="text-2xl font-medium">Local Block Explorer</h2>
         </div>
@@ -105,7 +107,9 @@ function calculateGasPercentage(gasUsed: number, gasLimit: number) {
               Mined By
             </div>
             <div class="col-span-3">
-              {{ block.miner }}
+              <RouterLink :to="{name: 'address', params: {address: block.miner}}" class="text-purple-500 hover:text-purple-400">
+                {{block.miner}}
+              </RouterLink>
             </div>
           </div>
           <hr class="my-4 border-gray-500">
