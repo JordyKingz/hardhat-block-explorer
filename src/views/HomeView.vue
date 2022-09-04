@@ -10,6 +10,8 @@ let state = reactive({
   ready: false,
 });
 
+let latestBlockTimestamp = ref('');
+
 let chain = reactive({latestBlocks: <Block[]>[], latestTransactions: []});
 // @ts-ignore
 const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -20,7 +22,6 @@ onBeforeMount(async () => {
 
 async function getBlockchainData() {
   await provider.on('block', async (blockNumber: number) => {
-    // const block = await provider.getBlock(blockNumber);
     await getBlockData(blockNumber);
   });
 }
@@ -57,12 +58,16 @@ function timePassed(timestamp: number) {
   const timePassed = new Date().getTime() - date.getTime();
 
   if (timePassed / minute < 1) {
+    latestBlockTimestamp.value = "just now";
     return "just now";
   } else if (timePassed / minute < 60) {
+    latestBlockTimestamp.value = Math.floor(timePassed / minute) + " minutes ago";
     return Math.floor(timePassed / minute) + " minutes ago";
   } else if (timePassed / minute < 1440) {
+    latestBlockTimestamp.value = Math.floor(timePassed / minute) + " hours ago";
     return Math.floor(timePassed / minute / 60) + " hours ago";
   } else {
+    latestBlockTimestamp.value = Math.floor(timePassed / minute) + " days ago";
     return Math.floor(timePassed / minute / 1440) + " days ago";
   }
 }
@@ -94,7 +99,7 @@ function blockReward(block: Block) {
               class="w-full bg-gray-800 rounded-md border py-2 text-lg px-5 border-gray-900 outline-none focus:ring-purple-500">
         </div>
         <div>
-          <button class="bg-gray-800 opacity-75 hover:bg-gray-400 hover:text-gray-900 rounded-md border py-2 px-4 font-medium text-lg border-gray-900">Search</button>
+          <button class="bg-gray-800 opacity-75 hover:bg-purple-500 hover:text-white rounded-md border py-2 px-4 font-medium text-lg border-gray-900">Search</button>
         </div>
       </div>
     </div>
@@ -114,11 +119,10 @@ function blockReward(block: Block) {
                 </div>
                 <div class="col-span-2">
                   <RouterLink :to="{name: 'block', params: {number: block.number}}">
-                    <span class="text-gray-500 block hover:text-gray-400">
+                    <span class="text-gray-500 block hover:text-purple-500">
                       {{block.number}}
                     </span>
                   </RouterLink>
-
                   <span class="text-xs">
                     {{ timePassed(block.timestamp) }}
                   </span>
@@ -126,9 +130,11 @@ function blockReward(block: Block) {
                 <div class="col-span-5">
                   <div class="flex">
                     Miner
-                    <span class="text-gray-500 pl-1 truncate">
-                      {{block.miner}}
-                    </span>
+                      <RouterLink class="truncate" :to="{name: 'address', params: {address: block.miner}}">
+                        <span class="text-gray-500 pl-1 hover:text-purple-500">
+                          {{block.miner}}
+                        </span>
+                      </RouterLink>
                   </div>
                   <div class="block">
                     <span class="text-gray-500">
@@ -155,15 +161,35 @@ function blockReward(block: Block) {
                     Tx
                   </button>
                 </div>
-                <div class="col-span-7 truncate">
+                <div class="col-span-2 truncate">
+                  <RouterLink :to="{name: 'tx', params: {hash: tx.hash}}">
+                    <span class="text-gray-500 truncate hover:text-purple-500">
+                      {{tx.hash}}
+                    </span>
+                  </RouterLink>
+                  <span class="text-xs block">
+                    {{ latestBlockTimestamp }}
+                  </span>
+                </div>
+                <div class="col-span-5 truncate">
                   <div class="block">
                     <div class="flex">
-                      From <span class="pl-2 text-gray-500">{{tx.from}}</span>
+                      From
+                      <RouterLink class="truncate" :to="{name: 'address', params: {address: tx.from}}">
+                        <span class="text-gray-500 pl-2 hover:text-purple-500">
+                          {{tx.from}}
+                        </span>
+                      </RouterLink>
                     </div>
                   </div>
                   <div class="block">
                     <div class="flex">
-                      To <span class="pl-2 text-gray-500">{{tx.to}}</span>
+                      To
+                      <RouterLink class="truncate" :to="{name: 'address', params: {address: tx.to}}">
+                        <span class="text-gray-500 pl-2 hover:text-purple-500">
+                          {{tx.to}}
+                        </span>
+                      </RouterLink>
                     </div>
                   </div>
                 </div>
