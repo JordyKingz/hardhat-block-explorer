@@ -175,7 +175,7 @@ function blockReward(block: Block) {
                   <div class="block">
                     <div class="flex">
                       From
-                      <RouterLink class="truncate" :to="{name: 'address', params: {address: tx.from}}">
+                      <RouterLink v-if="tx.from !== ''" class="truncate" :to="{name: 'address', params: {address: tx.from}}">
                         <span class="text-gray-500 pl-2 hover:text-purple-500">
                           {{tx.from}}
                         </span>
@@ -185,7 +185,7 @@ function blockReward(block: Block) {
                   <div class="block">
                     <div class="flex">
                       To
-                      <RouterLink class="truncate" :to="{name: 'address', params: {address: tx.to}}">
+                      <RouterLink v-if="tx.to !== ''" class="truncate" :to="{name: 'address', params: {address: tx.to}}">
                         <span class="text-gray-500 pl-2 hover:text-purple-500">
                           {{tx.to}}
                         </span>
