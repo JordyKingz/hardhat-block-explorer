@@ -82,7 +82,6 @@ function calculateGasPercentage(gasUsed: number, gasLimit: number) {
           Latest Block:
           <span class="text-xl text-gray-400">#{{block.number}}</span>
         </h3>
-
         <div class="mt-2 w-full bg-gray-800 px-4 py-3 rounded-lg">
           <div class="grid grid-cols-4 gap-4">
             <div class="col-span-1">

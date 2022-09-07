@@ -13,13 +13,13 @@ let state = reactive({
 const route = useRoute();
 // @ts-ignore
 const provider = new ethers.providers.Web3Provider(window.ethereum);
-const ethProvder = new ethers.providers.EtherscanProvider();
+const ethProvider = new ethers.providers.EtherscanProvider('goerli');
+// const ethProvider = new ethers.providers.EtherscanProvider('homestead', import.meta.env.VITE_ETHERSCAN_API);
 
 let address = reactive({transactions: <Tx[]>[]});
 let contract = reactive({abi: []});
 
 onBeforeMount(async () => {
-  console.log(import.meta.env.VITE_ETHERSCAN_API)
   await checkAddress();
   await getAddress();
 });
@@ -28,7 +28,7 @@ async function checkAddress() {
   try {
     const code = await provider.getCode(`${route.params.address}`);
     if (code !== '0x') {
-
+      console.log('contract');
       return true;
     }
   } catch (error) {
@@ -39,7 +39,7 @@ async function checkAddress() {
 async function getAddress() {
   console.log(route.params.address);
   // @ts-ignore
-  address.transactions = await ethProvder.getHistory(`${route.params.address}`);
+  address.transactions = await ethProvider.getHistory(`${route.params.address}`);
   console.log(address.transactions);
   // console.log(abiCoder.decode([''], tx.data));
   // console.log(ethers.utils.parseBytes32String(data));
