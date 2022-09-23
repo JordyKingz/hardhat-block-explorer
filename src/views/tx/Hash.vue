@@ -12,56 +12,98 @@ let state = reactive({
 
 let tx = ref({} as Tx);
 const contractAbi = ref([]);
+
 const route = useRoute();
 // @ts-ignore
 const provider = new ethers.providers.Web3Provider(window.ethereum);
 // @ts-ignore
 tx.value = await getTxData();
 // @ts-ignore
-contractAbi.value = await checkAddress();
+contractAbi.value = await getContractAbi();
 // @ts-ignore
 tx.value.data = await parseTxData();
 
-
-
 onMounted(async () => {
   state.ready = true;
-  console.log(tx.value.data);
 });
 
 async function getTxData() {
   // @ts-ignore
-  return await provider.getTransaction(`${route.params.hash}`);
+  const transaction = await provider.getTransaction(`${route.params.hash}`);
+  // const transaction = await provider.send("eth_getTransactionByHash", [`${route.params.hash}`]);
+
+  console.log(transaction)
+  return transaction
 }
 
+async function getContractAbi() {
+  console.log(tx.value.type)
+  console.log(tx.value)
+  if (tx.value.to) {
+    try {
+      console.log(tx.value.to)
+      const code = await provider.getCode(`${tx.value.to}`);
+      console.log(code)
+      if (code !== '0x') {
+        console.log('contract');
+        //make an API call to the ABIs endpoint
+        const response = await fetch(`https://api-goerli.etherscan.io/api?module=contract&action=getabi&address=${tx.value.to}&apikey=${import.meta.env.VITE_ETHERSCAN_API_KEY}`);
 
-async function checkAddress() {
-  try {
-    const code = await provider.getCode(`${tx.value.to}`);
-    if (code !== '0x') {
-      // make an API call to the ABIs endpoint
-      // const response = await fetch('https://api-ropsten.etherscan.io/api?module=contract&action=getabi&address=0xC1dcBB3E385Ef67f2173A375F63f5F4361C4d2f9&apikey=YourApiKeyToken');
-      // const data = await response.json();
-      // print the JSON response
-      // return data.result;
-      const response = await fetch(`/configs/abis/${tx.value.to}.json`);
-      const data = await response.json();
-      return JSON.stringify(data.abi);
+        const data = await response.json();
+        console.log(JSON.parse(data.result));
+        return JSON.parse(data.result);
+
+
+        // const response = await fetch(`/configs/abis/${tx.value.to}.json`);
+        // const data = await response.json();
+        // console.log(data.abi)
+        // return JSON.stringify(data.abi);
+        }
     }
-  } catch (error) {
-    console.log(error)
+    catch(error){
+      console.log('error');
+      console.log(error)
+    }
+  } else if (tx.value.creates) {
+    try {
+      console.log(tx.value.creates)
+      const code = await provider.getCode(`${tx.value.creates}`);
+      if (code !== '0x') {
+        console.log('contract');
+        const response = await fetch(`https://api-goerli.etherscan.io/api?module=contract&action=getabi&address=${tx.value.creates}&apikey=${import.meta.env.VITE_ETHERSCAN_API_KEY}`);
+        const data = await response.json();
+        // print the JSON response
+        console.log(data.result)
+        return JSON.stringify(data.result);
+
+        // const response = await fetch(`/configs/abis/${tx.value.creates}.json`);
+        // const data = await response.json();
+        // console.log(data.abi)
+        // return JSON.stringify(data.abi);
+      }
+    }
+    catch(error){
+      console.log(error)
+    }
+    return;
   }
 }
 
 async function parseTxData() {
-  try {
-    // @ts-ignore
-    const _interface = new ethers.utils.Interface(JSON.parse(contractAbi.value));
-
-    // @ts-ignore
-    return _interface.parseTransaction({data: tx.value.data, value: tx.value.value});
-  } catch (error) {
-    console.log(error)
+  console.log(tx.value.data)
+  if (tx.value.data) {
+    try {
+      // @ts-ignore
+      const _interface = new ethers.utils.Interface(contractAbi.value);
+      console.log(tx.value)
+      // @ts-ignore
+      const response = await _interface.parseTransaction({data: tx.value.data, value: tx.value.value});
+      console.log(response)
+      // @ts-ignore
+      return _interface.parseTransaction({data: tx.value.data, value: tx.value.value});
+    } catch (error) {
+      console.log(error)
+    }
   }
 }
 </script>
@@ -127,7 +169,10 @@ async function parseTxData() {
                   {{tx.to.substring(0, 10)}}...
                 </span>
               </RouterLink>
-              {{ethers.utils.formatEther(`${tx.data.value}`)}}
+
+              <span v-if="tx.data">
+                {{ethers.utils.formatEther(`${tx.data.value}`)}}
+              </span>
             </div>
           </div>
           <hr class="my-4 border-gray-500">
@@ -136,7 +181,8 @@ async function parseTxData() {
               Value
             </div>
             <div class="col-span-3">
-              {{ethers.utils.formatEther(`${tx.data.value}`)}} Ether
+              <span v-if="tx.data">{{ethers.utils.formatEther(`${tx.data.value}`)}} Ether</span>
+              <span v-else>{{ethers.utils.formatEther(`${tx.value.toString()}`)}}</span>
             </div>
           </div>
           <hr class="my-4 border-gray-500">
@@ -146,7 +192,7 @@ async function parseTxData() {
             </div>
             <div class="col-span-3">
               <div class="bg-gray-600 px-4 py-3 rounded-md">
-                <code>
+                <code v-if =tx.data>
                   {{ tx.data.functionFragment.type }} {{ tx.data.functionFragment.name }}(
                     <span v-for="(input, key) in tx.data.functionFragment.inputs" :key="key">
                       {{ input.type }} {{ input.name }}<span v-if="key !== tx.data.functionFragment.inputs.length - 1">, </span>

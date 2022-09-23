@@ -136,7 +136,11 @@ function calculateGasPercentage(gasUsed: number, gasLimit: number) {
               Hash
             </div>
             <div class="col-span-3">
-              {{ block.hash }}
+              <RouterLink :to="{name: 'tx', params: {hash: block.hash}}">
+                <span class="text-purple-500 hover:text-purple-400">
+                  {{block.hash}}
+                </span>
+              </RouterLink>
             </div>
           </div>
           <hr class="my-4 border-gray-500">
@@ -145,7 +149,11 @@ function calculateGasPercentage(gasUsed: number, gasLimit: number) {
               Parent Hash
             </div>
             <div class="col-span-3">
-              {{ block.parentHash}}
+              <RouterLink :to="{name: 'tx', params: {hash: block.parentHash}}">
+                <span class="text-purple-500 hover:text-purple-400">
+                  {{block.parentHash}}
+                </span>
+              </RouterLink>
             </div>
           </div>
           <hr class="my-4 border-gray-500">
