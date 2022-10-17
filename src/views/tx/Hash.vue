@@ -47,17 +47,17 @@ async function getContractAbi() {
       if (code !== '0x') {
         console.log('contract');
         //make an API call to the ABIs endpoint
-        const response = await fetch(`https://api-goerli.etherscan.io/api?module=contract&action=getabi&address=${tx.value.to}&apikey=${import.meta.env.VITE_ETHERSCAN_API_KEY}`);
-
-        const data = await response.json();
-        console.log(JSON.parse(data.result));
-        return JSON.parse(data.result);
-
-
-        // const response = await fetch(`/configs/abis/${tx.value.to}.json`);
+        // const response = await fetch(`https://api-goerli.etherscan.io/api?module=contract&action=getabi&address=${tx.value.to}&apikey=${import.meta.env.VITE_ETHERSCAN_API_KEY}`);
+        //
         // const data = await response.json();
-        // console.log(data.abi)
-        // return JSON.stringify(data.abi);
+        // console.log(JSON.parse(data.result));
+        // return JSON.parse(data.result);
+
+
+        const response = await fetch(`/configs/abis/${tx.value.to}.json`);
+        const data = await response.json();
+        console.log(data.abi)
+        return JSON.stringify(data.abi);
         }
     }
     catch(error){
