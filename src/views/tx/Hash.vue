@@ -8,55 +8,41 @@ const seconds = 1000;
 const minute = 1000 * 60;
 let state = reactive({
   ready: false,
+  formatData: false
 });
 
 let tx = ref({} as Tx);
 const contractAbi = ref([]);
-
 const route = useRoute();
 // @ts-ignore
 const provider = new ethers.providers.Web3Provider(window.ethereum);
-// @ts-ignore
-tx.value = await getTxData();
-// @ts-ignore
-contractAbi.value = await getContractAbi();
-// @ts-ignore
-tx.value.data = await parseTxData();
 
 onMounted(async () => {
+  // @ts-ignore
+  tx.value = await getTxData();
+  // @ts-ignore
+  contractAbi.value = await getContractAbi();
+
+  if (tx.value.type !== 2) {
+    // @ts-ignore
+    tx.value.data = await parseTxData();
+  }
   state.ready = true;
 });
 
 async function getTxData() {
   // @ts-ignore
-  const transaction = await provider.getTransaction(`${route.params.hash}`);
+  return await provider.getTransaction(`${route.params.hash}`);
   // const transaction = await provider.send("eth_getTransactionByHash", [`${route.params.hash}`]);
-
-  console.log(transaction)
-  return transaction
 }
 
 async function getContractAbi() {
-  console.log(tx.value.type)
-  console.log(tx.value)
   if (tx.value.to) {
     try {
-      console.log(tx.value.to)
       const code = await provider.getCode(`${tx.value.to}`);
-      console.log(code)
       if (code !== '0x') {
-        console.log('contract');
-        //make an API call to the ABIs endpoint
-        // const response = await fetch(`https://api-goerli.etherscan.io/api?module=contract&action=getabi&address=${tx.value.to}&apikey=${import.meta.env.VITE_ETHERSCAN_API_KEY}`);
-        //
-        // const data = await response.json();
-        // console.log(JSON.parse(data.result));
-        // return JSON.parse(data.result);
-
-
         const response = await fetch(`/configs/abis/${tx.value.to}.json`);
         const data = await response.json();
-        console.log(data.abi)
         return JSON.stringify(data.abi);
         }
     }
@@ -66,20 +52,11 @@ async function getContractAbi() {
     }
   } else if (tx.value.creates) {
     try {
-      console.log(tx.value.creates)
       const code = await provider.getCode(`${tx.value.creates}`);
       if (code !== '0x') {
-        console.log('contract');
-        const response = await fetch(`https://api-goerli.etherscan.io/api?module=contract&action=getabi&address=${tx.value.creates}&apikey=${import.meta.env.VITE_ETHERSCAN_API_KEY}`);
+        const response = await fetch(`/configs/abis/${tx.value.creates}.json`);
         const data = await response.json();
-        // print the JSON response
-        console.log(data.result)
-        return JSON.stringify(data.result);
-
-        // const response = await fetch(`/configs/abis/${tx.value.creates}.json`);
-        // const data = await response.json();
-        // console.log(data.abi)
-        // return JSON.stringify(data.abi);
+        return JSON.stringify(data.abi);
       }
     }
     catch(error){
@@ -90,15 +67,13 @@ async function getContractAbi() {
 }
 
 async function parseTxData() {
-  console.log(tx.value.data)
   if (tx.value.data) {
     try {
       // @ts-ignore
       const _interface = new ethers.utils.Interface(contractAbi.value);
-      console.log(tx.value)
       // @ts-ignore
       const response = await _interface.parseTransaction({data: tx.value.data, value: tx.value.value});
-      console.log(response)
+      state.formatData = true;
       // @ts-ignore
       return _interface.parseTransaction({data: tx.value.data, value: tx.value.value});
     } catch (error) {
@@ -131,20 +106,20 @@ async function parseTxData() {
               From
             </div>
             <div class="col-span-3">
-              <RouterLink v-if="tx.from !== ''" class="truncate" :to="{name: 'address', params: {address: tx.from}}">
+              <RouterLink v-if="tx.from" class="truncate" :to="{name: 'address', params: {address: tx.from}}">
                 <span class="text-blue-500 pl-2 hover:text-purple-500">
                   {{tx.from}}
                 </span>
               </RouterLink>
             </div>
           </div>
-          <hr class="my-4 border-gray-500">
-          <div class="grid grid-cols-4 gap-4">
+          <hr v-if="tx.type !== 2" class="my-4 border-gray-500">
+          <div v-if="tx.type !== 2" class="grid grid-cols-4 gap-4">
             <div class="col-span-1">
               Interacted with (to)
             </div>
             <div class="col-span-3">
-              <RouterLink v-if="tx.to !== ''" class="truncate" :to="{name: 'address', params: {address: tx.to}}">
+              <RouterLink v-if="tx.to" class="truncate" :to="{name: 'address', params: {address: tx.to}}">
                 <span class="text-blue-500 pl-2 hover:text-purple-500">
                   {{tx.to}}
                 </span>
@@ -153,30 +128,43 @@ async function parseTxData() {
           </div>
           <hr class="my-4 border-gray-500">
           <div class="grid grid-cols-4 gap-4">
-            <div class="col-span-1">
+            <div v-if="tx.type !== 2" class="col-span-1">
               Tokens Transferred
+            </div>
+            <div v-else-if="tx.type === 2" class="col-span-1">
+              Contract created
             </div>
             <div class="col-span-3">
               From
-              <RouterLink class="truncate" :to="{name: 'address', params: {address: tx.to}}">
+              <RouterLink v-if="tx.from" class="truncate" :to="{name: 'address', params: {address: tx.from}}">
                 <span class="text-blue-500 pl-2 pr-1 hover:text-purple-500">
                   {{tx.from.substring(0, 10)}}...
                 </span>
               </RouterLink>
-              To
-              <RouterLink class="truncate" :to="{name: 'address', params: {address: tx.to}}">
+              <span v-if="tx.type !== 2">
+                To
+              </span>
+              <span v-else-if="tx.type === 2">
+                Created
+              </span>
+              <RouterLink v-if="tx.to" class="truncate" :to="{name: 'address', params: {address: tx.to}}">
                 <span class="text-blue-500 pl-2 pr-1 hover:text-purple-500">
                   {{tx.to.substring(0, 10)}}...
                 </span>
               </RouterLink>
+              <RouterLink v-else-if="tx.creates" class="truncate" :to="{name: 'address', params: {address: tx.creates}}">
+                <span class="text-blue-500 pl-2 pr-1 hover:text-purple-500">
+                  {{tx.creates.substring(0, 10)}}...
+                </span>
+              </RouterLink>
 
-              <span v-if="tx.data">
+              <span v-if="tx.data && tx.data.value">
                 {{ethers.utils.formatEther(`${tx.data.value}`)}}
               </span>
             </div>
           </div>
-          <hr class="my-4 border-gray-500">
-          <div class="grid grid-cols-4 gap-4">
+          <hr v-if="state.formatData"  class="my-4 border-gray-500">
+          <div v-if="state.formatData" class="grid grid-cols-4 gap-4">
             <div class="col-span-1">
               Value
             </div>
@@ -185,14 +173,14 @@ async function parseTxData() {
               <span v-else>{{ethers.utils.formatEther(`${tx.value.toString()}`)}}</span>
             </div>
           </div>
-          <hr class="my-4 border-gray-500">
-          <div class="grid grid-cols-4 gap-4">
+          <hr v-if="state.formatData"  class="my-4 border-gray-500">
+          <div v-if="state.formatData" class="grid grid-cols-4 gap-4">
             <div class="col-span-1">
               Input Data
             </div>
             <div class="col-span-3">
               <div class="bg-gray-600 px-4 py-3 rounded-md">
-                <code v-if =tx.data>
+                <code v-if="tx.data">
                   {{ tx.data.functionFragment.type }} {{ tx.data.functionFragment.name }}(
                     <span v-for="(input, key) in tx.data.functionFragment.inputs" :key="key">
                       {{ input.type }} {{ input.name }}<span v-if="key !== tx.data.functionFragment.inputs.length - 1">, </span>
