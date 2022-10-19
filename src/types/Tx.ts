@@ -15,6 +15,7 @@ export type Tx = {
     transactionIndex: number;
     type: number;
     value: string;
+    timestamp: number
 };
 
 type Data = {

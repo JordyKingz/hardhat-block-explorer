@@ -50,8 +50,32 @@ async function getAddress() {
   <div>
     <div class="mx-auto max-w-7xl">
       <RouterLink to="/">Home</RouterLink>
-
       Address: {{route.params.address}}
+      <br>
+      {{address.transactions.length}}
+
+      <table class="min-w-full divide-y divide-gray-300">
+        <thead>
+          <tr>
+            <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-white sm:pl-6">Tx hash</th>
+            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-white">Block nr</th>
+            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-white">Timestamp</th>
+            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-white">From</th>
+            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-white">To</th>
+            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-white">Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(tx, key) in address.transactions">
+            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-white sm:pl-6">{{tx.hash}}</td>
+            <td class="whitespace-nowrap px-3 py-4 text-sm text-white">{{ tx.blockNumber }}</td>
+            <td class="whitespace-nowrap px-3 py-4 text-sm text-white">{{ tx.timestamp }}</td>
+            <td class="whitespace-nowrap px-3 py-4 text-sm text-white">{{ tx.from }}</td>
+            <td class="whitespace-nowrap px-3 py-4 text-sm text-white">{{ tx.to }}</td>
+            <td class="whitespace-nowrap px-3 py-4 text-sm text-white">{{ ethers.utils.formatEther(tx.value.toString()) }}ETH</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </template>
