@@ -1,42 +1,98 @@
 <script setup lang="ts">
 import {RouterLink, useRoute} from 'vue-router'
 import {ethers} from "ethers";
-import {onBeforeMount, reactive, ref} from "vue";
+import {onBeforeMount, onMounted, reactive, ref} from "vue";
 import type {Tx} from "@/types/Tx";
 
 const seconds = 1000;
 const minute = 1000 * 60;
 let state = reactive({
   ready: false,
+  formatData: false
 });
 
 let tx = ref({} as Tx);
+const contractAbi = ref([]);
 const route = useRoute();
 // @ts-ignore
 const provider = new ethers.providers.Web3Provider(window.ethereum);
 
-onBeforeMount(async () => {
-  await getTxData();
-  await parseTxData();
+onMounted(async () => {
+  // @ts-ignore
+  tx.value = await getTxData();
+
+  if (tx.value) {
+    // @ts-ignore
+    contractAbi.value = await getContractAbi();
+
+    if (tx.value && tx.value.data) {
+      // @ts-ignore
+      tx.value.data = await parseTxData();
+    }
+    state.ready = true;
+  }
 });
 
 async function getTxData() {
+  // const transaction = await provider.send("eth_getTransactionByHash", [`${route.params.hash}`]);
+  // console.log(transaction)
   // @ts-ignore
-  tx.value = await provider.getTransaction(`${route.params.hash}`);
+  const response =  await provider.getTransaction(`${route.params.hash}`);
+  console.log(response);
+  // @ts-ignore
+  return await provider.getTransaction(`${route.params.hash}`);
+}
+
+async function getContractAbi() {
+  if (tx.value && tx.value.to) {
+    try {
+      const code = await provider.getCode(`${tx.value.to}`);
+      if (code !== '0x') {
+        const response = await fetch(`/configs/abis/${tx.value.to}.json`);
+        const data = await response.json();
+        return data.abi;
+      }
+    }
+    catch(error){
+      console.log('error');
+      console.log(error)
+    }
+  } else if (tx.value && tx.value.creates) {
+    try {
+      const code = await provider.getCode(`${tx.value.creates}`);
+      if (code !== '0x') {
+        const response = await fetch(`/configs/abis/${tx.value.creates}.json`);
+        const data = await response.json();
+        return data.abi;
+      }
+    }
+    catch(error){
+      console.log(error)
+    }
+    return;
+  }
 }
 
 async function parseTxData() {
-  // todo get abi when tx.to is to a contract. Needed to decode the data inputs of the tx
-  // use etherscan api to get abi
-  const ABI = [{"constant":true,"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"approve","outputs":[{"internalType":"bool","name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"totalSupply","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"transferFrom","outputs":[{"internalType":"bool","name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"decimals","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"addedValue","type":"uint256"}],"name":"increaseAllowance","outputs":[{"internalType":"bool","name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"mint","outputs":[{"internalType":"bool","name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"internalType":"address","name":"owner","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"addMinter","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[],"name":"renounceMinter","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"subtractedValue","type":"uint256"}],"name":"decreaseAllowance","outputs":[{"internalType":"bool","name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"transfer","outputs":[{"internalType":"bool","name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"isMinter","outputs":[{"internalType":"bool","name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"internalType":"address","name":"owner","type":"address"},{"internalType":"address","name":"spender","type":"address"}],"name":"allowance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"string","name":"_name","type":"string"},{"internalType":"string","name":"_symbol","type":"string"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"account","type":"address"}],"name":"MinterAdded","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"account","type":"address"}],"name":"MinterRemoved","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Transfer","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"address","name":"spender","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Approval","type":"event"}];
-  const _interface = new ethers.utils.Interface(ABI);
-  // @ts-ignore
-  tx.value.data = await _interface.parseTransaction({data: tx.value.data, value: tx.value.value});
+  if (tx.value && !tx.value.creates && tx.value.data) {
+    try {
+      // @ts-ignore
+      const _interface = new ethers.utils.Interface(contractAbi.value);
+      // @ts-ignore
+      const response = await _interface.parseTransaction({data: tx.value.data, value: tx.value.value});
+      console.log(response);
+      state.formatData = true;
+      // @ts-ignore
+      return _interface.parseTransaction({data: tx.value.data, value: tx.value.value});
+    } catch (error) {
+      console.log(error)
+    }
+  }
 }
 </script>
 
 <template>
-  <div>
+  <div v-if="state.ready">
     <div class="mx-auto max-w-7xl">
       <RouterLink to="/">Home</RouterLink>
       <div class="mt-2">
@@ -55,24 +111,40 @@ async function parseTxData() {
           <hr class="my-4 border-gray-500">
           <div class="grid grid-cols-4 gap-4">
             <div class="col-span-1">
-              From
+              Block
             </div>
             <div class="col-span-3">
-              <RouterLink v-if="tx.from !== ''" class="truncate" :to="{name: 'address', params: {address: tx.from}}">
-                <span class="text-blue-500 pl-2 hover:text-purple-500">
-                  {{tx.from}}
-                </span>
-              </RouterLink>
+              <div class="flex">
+                <RouterLink :to="{name: 'block', params: {number: tx.blockNumber}}">
+                  <span class="text-blue-500 block hover:text-purple-500">
+                    {{tx.blockNumber}}
+                  </span>
+                </RouterLink>
+                <span class="ml-2 bg-gray-700 px-3 rounded-md">{{tx.confirmations}} Block Confirmation</span>
+              </div>
             </div>
           </div>
           <hr class="my-4 border-gray-500">
           <div class="grid grid-cols-4 gap-4">
             <div class="col-span-1">
+              From
+            </div>
+            <div class="col-span-3">
+              <RouterLink v-if="tx.from" class="truncate" :to="{name: 'address', params: {address: tx.from}}">
+                <span class="text-blue-500 hover:text-purple-500">
+                  {{tx.from}}
+                </span>
+              </RouterLink>
+            </div>
+          </div>
+          <hr v-if="tx.to" class="my-4 border-gray-500">
+          <div v-if="tx.to" class="grid grid-cols-4 gap-4">
+            <div class="col-span-1">
               Interacted with (to)
             </div>
             <div class="col-span-3">
-              <RouterLink v-if="tx.to !== ''" class="truncate" :to="{name: 'address', params: {address: tx.to}}">
-                <span class="text-blue-500 pl-2 hover:text-purple-500">
+              <RouterLink v-if="tx.to" class="truncate" :to="{name: 'address', params: {address: tx.to}}">
+                <span class="text-blue-500 hover:text-purple-500">
                   {{tx.to}}
                 </span>
               </RouterLink>
@@ -80,23 +152,38 @@ async function parseTxData() {
           </div>
           <hr class="my-4 border-gray-500">
           <div class="grid grid-cols-4 gap-4">
-            <div class="col-span-1">
+            <div v-if="tx.to" class="col-span-1">
               Tokens Transferred
+            </div>
+            <div v-else-if="tx.creates" class="col-span-1">
+              Contract created
             </div>
             <div class="col-span-3">
               From
-              <RouterLink class="truncate" :to="{name: 'address', params: {address: tx.to}}">
+              <RouterLink v-if="tx.from" class="truncate" :to="{name: 'address', params: {address: tx.from}}">
                 <span class="text-blue-500 pl-2 pr-1 hover:text-purple-500">
                   {{tx.from.substring(0, 10)}}...
                 </span>
               </RouterLink>
-              To
-              <RouterLink class="truncate" :to="{name: 'address', params: {address: tx.to}}">
+              <span v-if="tx.to">
+                To
+              </span>
+              <span v-else-if="tx.creates">
+                Created
+              </span>
+              <RouterLink v-if="tx.to" class="truncate" :to="{name: 'address', params: {address: tx.to}}">
                 <span class="text-blue-500 pl-2 pr-1 hover:text-purple-500">
-                  {{tx.data.args.to.substring(0, 10)}}...
+                  {{tx.to.substring(0, 10)}}...
                 </span>
               </RouterLink>
-              {{ethers.utils.formatEther(`${tx.data.args.value}`)}}
+              <RouterLink v-else-if="tx.creates" class="truncate" :to="{name: 'address', params: {address: tx.creates}}">
+                <span class="text-blue-500 pl-2 pr-1 hover:text-purple-500">
+                  {{tx.creates.substring(0, 10)}}...
+                </span>
+              </RouterLink>
+              <span v-if="tx.data && tx.data.value">
+                {{ethers.utils.formatEther(`${tx.data.value}`)}}
+              </span>
             </div>
           </div>
           <hr class="my-4 border-gray-500">
@@ -105,17 +192,18 @@ async function parseTxData() {
               Value
             </div>
             <div class="col-span-3">
-              {{tx.value.toString()}} Ether
+              <span v-if="tx.data">{{ethers.utils.formatEther(`${tx.data.value}`)}} Ether</span>
+              <span v-else>{{ethers.utils.formatEther(`${tx.value.toString()}`)}}</span>
             </div>
           </div>
-          <hr class="my-4 border-gray-500">
-          <div class="grid grid-cols-4 gap-4">
+          <hr v-if="state.formatData" class="my-4 border-gray-500">
+          <div v-if="state.formatData" class="grid grid-cols-4 gap-4">
             <div class="col-span-1">
               Input Data
             </div>
             <div class="col-span-3">
               <div class="bg-gray-600 px-4 py-3 rounded-md">
-                <code>
+                <code v-if="tx.data">
                   {{ tx.data.functionFragment.type }} {{ tx.data.functionFragment.name }}(
                     <span v-for="(input, key) in tx.data.functionFragment.inputs" :key="key">
                       {{ input.type }} {{ input.name }}<span v-if="key !== tx.data.functionFragment.inputs.length - 1">, </span>
@@ -132,7 +220,6 @@ async function parseTxData() {
               </div>
             </div>
           </div>
-
         </div>
       </div>
     </div>

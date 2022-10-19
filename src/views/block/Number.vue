@@ -133,21 +133,31 @@ function calculateGasPercentage(gasUsed: number, gasLimit: number) {
           <hr class="my-4 border-gray-500">
           <div class="grid grid-cols-4 gap-4">
             <div class="col-span-1">
-              Hash
+              Transactions
             </div>
             <div class="col-span-3">
-              {{ block.hash }}
+              <div v-for="(tx, key) in block.transactions" :key="key" class="block">
+                <RouterLink :to="{name: 'tx', params: {hash: tx}}">
+                <span class="text-purple-500 hover:text-purple-400">
+                  {{ tx }}
+                </span>
+                </RouterLink>
+              </div>
             </div>
           </div>
-          <hr class="my-4 border-gray-500">
-          <div class="grid grid-cols-4 gap-4">
-            <div class="col-span-1">
-              Parent Hash
-            </div>
-            <div class="col-span-3">
-              {{ block.parentHash}}
-            </div>
-          </div>
+<!--          <hr class="my-4 border-gray-500">-->
+<!--          <div class="grid grid-cols-4 gap-4">-->
+<!--            <div class="col-span-1">-->
+<!--              Parent Hash-->
+<!--            </div>-->
+<!--            <div class="col-span-3">-->
+<!--              <RouterLink :to="{name: 'tx', params: {hash: block.parentHash}}">-->
+<!--                <span class="text-purple-500 hover:text-purple-400">-->
+<!--                  {{block.parentHash}}-->
+<!--                </span>-->
+<!--              </RouterLink>-->
+<!--            </div>-->
+<!--          </div>-->
           <hr class="my-4 border-gray-500">
           <div class="grid grid-cols-4 gap-4">
             <div class="col-span-1">
