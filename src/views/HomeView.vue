@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { RouterLink } from 'vue-router'
+import {RouterLink, useRouter} from 'vue-router'
 import {ethers} from "ethers";
 import {onBeforeMount, reactive, ref} from "vue";
 import type {Block} from "@/types/Block";
+import Search from "@/components/Search.vue";
 
 const seconds = 1000;
 const minute = 1000 * 60;
@@ -90,17 +91,7 @@ function blockReward(block: Block) {
       <div>
         <h2 class="text-2xl font-medium">Local Block Explorer</h2>
       </div>
-      <div class="mt-4 grid grid-cols-3 gap-2">
-        <div class="col-span-2">
-          <input
-              type="text"
-              placeholder="Search by Address / Txn Hash / Block / Token"
-              class="w-full bg-gray-800 rounded-md border py-2 text-lg px-5 border-gray-900 outline-none focus:ring-purple-500">
-        </div>
-        <div>
-          <button class="bg-gray-800 opacity-75 hover:bg-purple-500 hover:text-white rounded-md border py-2 px-4 font-medium text-lg border-gray-900">Search</button>
-        </div>
-      </div>
+      <Search />
     </div>
     <div v-if="state.ready" class="mt-2">
       <div class="grid grid-cols-2 gap-6">

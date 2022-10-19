@@ -3,6 +3,7 @@ import {RouterLink, useRoute} from 'vue-router'
 import {ethers} from "ethers";
 import {onBeforeMount, reactive, ref} from "vue";
 import type {Block} from "@/types/Block";
+import Search from "@/components/Search.vue";
 
 const seconds = 1000;
 const minute = 1000 * 60;
@@ -61,20 +62,8 @@ function calculateGasPercentage(gasUsed: number, gasLimit: number) {
     <div class="mx-auto max-w-7xl">
       <div class="py-12 w-1/2">
         <RouterLink to="/">Home</RouterLink>
-
         <div>
           <h2 class="text-2xl font-medium">Local Block Explorer</h2>
-        </div>
-        <div class="mt-4 grid grid-cols-3 gap-2">
-          <div class="col-span-2">
-            <input
-                type="text"
-                placeholder="Search by Address / Txn Hash / Block / Token"
-                class="w-full bg-gray-800 rounded-md border py-2 text-lg px-5 border-gray-900 outline-none focus:ring-purple-500">
-          </div>
-          <div>
-            <button class="bg-gray-800 opacity-75 hover:bg-gray-400 hover:text-gray-900 rounded-md border py-2 px-4 font-medium text-lg border-gray-900">Search</button>
-          </div>
         </div>
       </div>
       <div v-if="state.ready" class="mt-2">
