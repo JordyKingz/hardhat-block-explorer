@@ -95,7 +95,7 @@ function calculateGasPercentage(gasUsed: number, gasLimit: number) {
               Mined By
             </div>
             <div class="col-span-3">
-              <RouterLink :to="{name: 'address', params: {address: block.miner}}" class="text-purple-500 hover:text-purple-400">
+              <RouterLink :to="{name: 'address', params: {address: block.miner}}" class="text-blue-500 hover:text-purple-500">
                 {{block.miner}}
               </RouterLink>
             </div>
@@ -127,7 +127,7 @@ function calculateGasPercentage(gasUsed: number, gasLimit: number) {
             <div class="col-span-3">
               <div v-for="(tx, key) in block.transactions" :key="key" class="block">
                 <RouterLink :to="{name: 'tx', params: {hash: tx}}">
-                <span class="text-purple-500 hover:text-purple-400">
+                <span class="text-blue-500 hover:text-purple-500">
                   {{ tx }}
                 </span>
                 </RouterLink>
