@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import {RouterLink, useRoute} from 'vue-router'
 import {ethers} from "ethers";
-import {onBeforeMount, reactive, ref} from "vue";
+import {onBeforeMount, reactive, ref, watch} from "vue";
 import type {Tx} from "@/types/Tx";
+import router from "@/router";
 
 const seconds = 1000;
 const minute = 1000 * 60;
@@ -11,6 +12,7 @@ let state = reactive({
 });
 
 const route = useRoute();
+const reactiveRoute = ref(route);
 // @ts-ignore
 const provider = new ethers.providers.Web3Provider(window.ethereum);
 const ethProvider = new ethers.providers.EtherscanProvider('homestead');
@@ -19,17 +21,24 @@ const ethProvider = new ethers.providers.EtherscanProvider('homestead');
 let address = reactive({transactions: <Tx[]>[]});
 let contract = reactive({abi: []});
 let tx = ref({} as Tx);
+const balance = ref(0);
+const routerAddress = ref('');
 
 onBeforeMount(async () => {
+  routerAddress.value = `${route.params.address}`;
+  await initPage();
+});
+
+async function initPage() {
   await checkAddress();
   await getTransactionsByAddress();
-});
+  await getAddressBalance();
+}
 
 async function checkAddress() {
   try {
     const code = await provider.getCode(`${route.params.address}`);
     if (code !== '0x') {
-      console.log('contract');
       return true;
     }
   } catch (error) {
@@ -67,7 +76,6 @@ async function getTxData() {
             const abi = await getTxAbi(tx);
             // @ts-ignore
             tx.data = await parseTxData(tx, abi);
-            console.log(tx);
             txArray.push(tx);
           }
         }
@@ -118,6 +126,12 @@ async function parseTxData(tx: any, abi: any) {
 function formatHash(address: string, length: number) {
   return `${address.substring(0, length)}...`;
 }
+async function getAddressBalance() {
+  const balanceInWei = await provider.getBalance(`${route.params.address}`);
+  // @ts-ignore
+  balance.value = ethers.utils.formatEther(balanceInWei);
+}
+
 </script>
 
 <template>
@@ -125,7 +139,15 @@ function formatHash(address: string, length: number) {
     <div class="mx-auto max-w-7xl">
       <div class="py-12">
         <RouterLink to="/">Home</RouterLink>
-        <div class="bg-gray-800 px-4 py-3 rounded-lg">
+        <div class="mt-2">
+          <div class="grid grid-cols-2 gap-5">
+            <div class="bg-gray-800 px-4 py-3 rounded-lg">
+              <span>Balance:</span>
+              {{ balance }} Ether
+            </div>
+          </div>
+        </div>
+        <div class="bg-gray-800 px-4 py-3 rounded-lg mt-2">
           <table v-if="address.transactions.length > 0" class="min-w-full divide-y divide-gray-300">
             <thead>
               <tr>
@@ -147,7 +169,7 @@ function formatHash(address: string, length: number) {
                   </RouterLink>
                 </td>
                 <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-white">
-                  <span class="bg-gray-800 px-2 py-2 rounded-lg">{{tx.data.name}}</span>
+                  <span v-if="tx.data" class="bg-gray-600 px-2 py-2 rounded-lg">{{tx.data.name}}</span>
                 </td>
                 <td class="whitespace-nowrap px-3 py-4 text-sm text-white">
                   <RouterLink :to="{name: 'block', params: {number: tx.blockNumber}}">
@@ -157,23 +179,31 @@ function formatHash(address: string, length: number) {
                   </RouterLink>
                 </td>
                 <td class="whitespace-nowrap px-3 py-4 text-sm">
-                  <span v-if="tx.from.toLowerCase() === String(route.params.address).toLowerCase()" >{{ formatHash(tx.from, 14) }}</span>
+                  <span v-if="tx.from && tx.from.toLowerCase() === String(route.params.address).toLowerCase()" >{{ formatHash(tx.from, 14) }}</span>
                   <span v-else>
                     <RouterLink :to="{name: 'address', params: {address: tx.from}}">
-                      <span class="text-blue-500 block hover:text-purple-500">
+                      <span class="text-blue-500 cursor-pointer block hover:text-purple-500">
                         {{ formatHash(tx.from, 14) }}
                       </span>
                     </RouterLink>
                   </span>
                 </td>
                 <td class="whitespace-nowrap px-3 py-4 text-sm">
-                  <span v-if="tx.to.toLowerCase() === String(route.params.address).toLowerCase()" >{{ formatHash(tx.to, 14) }}</span>
-                  <span v-else>
+                  <span v-if="tx.to && tx.to.toLowerCase() === String(route.params.address).toLowerCase()" >{{ formatHash(tx.to, 14) }}</span>
+                  <span v-else-if="tx.creates && tx.creates.toLowerCase() === String(route.params.address).toLowerCase()" >{{ formatHash(tx.creates, 14) }}</span>
+                  <span v-else-if="tx.to">
                     <RouterLink v-if="tx.to && tx.to !== ''" class="truncate" :to="{name: 'address', params: {address: tx.to}}">
-                    <span class="text-blue-500 pl-2 hover:text-purple-500">
-                      {{ formatHash(tx.to, 14) }}
-                    </span>
-                  </RouterLink>
+                      <span class="text-blue-500 pl-2 hover:text-purple-500">
+                        {{ formatHash(tx.to, 14) }}
+                      </span>
+                    </RouterLink>
+                  </span>
+                  <span v-else-if="tx.creates">
+                    <RouterLink v-if="tx.creates && tx.creates !== ''" class="truncate" :to="{name: 'address', params: {address: tx.creates}}">
+                      <span class="text-blue-500 pl-2 hover:text-purple-500">
+                        {{ formatHash(tx.creates, 14) }}
+                      </span>
+                    </RouterLink>
                   </span>
                 </td>
                 <td class="whitespace-nowrap px-3 py-4 text-sm text-white">{{ ethers.utils.formatEther(tx.value.toString()) }} Ether</td>

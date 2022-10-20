@@ -93,6 +93,7 @@ async function parseTxData() {
     <div class="mx-auto max-w-7xl">
       <div class="py-12">
         <RouterLink to="/">Home</RouterLink>
+
         <div v-if="state.ready" class="mt-2">
           <h3 class="text-gray-200 text-2xl">
             Transaction Details
