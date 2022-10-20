@@ -123,61 +123,68 @@ function formatHash(address: string, length: number) {
 <template>
   <div>
     <div class="mx-auto max-w-7xl">
-      <RouterLink to="/">Home</RouterLink>
-      <table v-if="address.transactions.length > 0" class="min-w-full divide-y divide-gray-300">
-        <thead>
-          <tr>
-            <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-white">Tx hash</th>
-            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-white">Method</th>
-            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-white">Block</th>
-            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-white">From</th>
-            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-white">To</th>
-            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-white">Value</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(tx, key) in address.transactions">
-            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium">
-              <RouterLink :to="{name: 'tx', params: {hash: tx.hash}}">
-                <span class="text-blue-500 hover:text-purple-500">
-                  {{ formatHash(tx.hash, 24) }}
-                </span>
-              </RouterLink>
-            </td>
-            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-white">
-              <span class="bg-gray-800 px-2 py-2 rounded-lg">{{tx.data.name}}</span>
-            </td>
-            <td class="whitespace-nowrap px-3 py-4 text-sm text-white">
-              <RouterLink :to="{name: 'block', params: {number: tx.blockNumber}}">
-                <span class="text-blue-500 block hover:text-purple-500">
-                  {{tx.blockNumber}}
-                </span>
-              </RouterLink>
-            </td>
-            <td class="whitespace-nowrap px-3 py-4 text-sm">
-              <span v-if="tx.from.toLowerCase() === String(route.params.address).toLowerCase()" >{{ formatHash(tx.from, 14) }}</span>
-              <span v-else>
-                <RouterLink :to="{name: 'address', params: {address: tx.from}}">
-                  <span class="text-blue-500 block hover:text-purple-500">
-                    {{ formatHash(tx.from, 14) }}
+      <div class="py-12">
+        <RouterLink to="/">Home</RouterLink>
+        <div class="bg-gray-800 px-4 py-3 rounded-lg">
+          <table v-if="address.transactions.length > 0" class="min-w-full divide-y divide-gray-300">
+            <thead>
+              <tr>
+                <th scope="col" class="py-3.5 pr-3 text-left text-sm font-semibold text-white">Tx hash</th>
+                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-white">Method</th>
+                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-white">Block</th>
+                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-white">From</th>
+                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-white">To</th>
+                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-white">Value</th>
+              </tr>
+            </thead>
+            <tbody >
+              <tr v-for="(tx, key) in address.transactions">
+                <td class="whitespace-nowrap py-4 pr-3 text-sm font-medium">
+                  <RouterLink :to="{name: 'tx', params: {hash: tx.hash}}">
+                    <span class="text-blue-500 hover:text-purple-500">
+                      {{ formatHash(tx.hash, 24) }}
+                    </span>
+                  </RouterLink>
+                </td>
+                <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-white">
+                  <span class="bg-gray-800 px-2 py-2 rounded-lg">{{tx.data.name}}</span>
+                </td>
+                <td class="whitespace-nowrap px-3 py-4 text-sm text-white">
+                  <RouterLink :to="{name: 'block', params: {number: tx.blockNumber}}">
+                    <span class="text-blue-500 block hover:text-purple-500">
+                      {{tx.blockNumber}}
+                    </span>
+                  </RouterLink>
+                </td>
+                <td class="whitespace-nowrap px-3 py-4 text-sm">
+                  <span v-if="tx.from.toLowerCase() === String(route.params.address).toLowerCase()" >{{ formatHash(tx.from, 14) }}</span>
+                  <span v-else>
+                    <RouterLink :to="{name: 'address', params: {address: tx.from}}">
+                      <span class="text-blue-500 block hover:text-purple-500">
+                        {{ formatHash(tx.from, 14) }}
+                      </span>
+                    </RouterLink>
                   </span>
-                </RouterLink>
-              </span>
-            </td>
-            <td class="whitespace-nowrap px-3 py-4 text-sm">
-              <span v-if="tx.to.toLowerCase() === String(route.params.address).toLowerCase()" >{{ formatHash(tx.to, 14) }}</span>
-              <span v-else>
-                <RouterLink v-if="tx.to && tx.to !== ''" class="truncate" :to="{name: 'address', params: {address: tx.to}}">
-                <span class="text-blue-500 pl-2 hover:text-purple-500">
-                  {{ formatHash(tx.to, 14) }}
-                </span>
-              </RouterLink>
-              </span>
-            </td>
-            <td class="whitespace-nowrap px-3 py-4 text-sm text-white">{{ ethers.utils.formatEther(tx.value.toString()) }} Ether</td>
-          </tr>
-        </tbody>
-      </table>
+                </td>
+                <td class="whitespace-nowrap px-3 py-4 text-sm">
+                  <span v-if="tx.to.toLowerCase() === String(route.params.address).toLowerCase()" >{{ formatHash(tx.to, 14) }}</span>
+                  <span v-else>
+                    <RouterLink v-if="tx.to && tx.to !== ''" class="truncate" :to="{name: 'address', params: {address: tx.to}}">
+                    <span class="text-blue-500 pl-2 hover:text-purple-500">
+                      {{ formatHash(tx.to, 14) }}
+                    </span>
+                  </RouterLink>
+                  </span>
+                </td>
+                <td class="whitespace-nowrap px-3 py-4 text-sm text-white">{{ ethers.utils.formatEther(tx.value.toString()) }} Ether</td>
+              </tr>
+            </tbody>
+          </table>
+          <div v-if="address.transactions.length === 0" class="text-center">
+            No Transactions To Show...
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
