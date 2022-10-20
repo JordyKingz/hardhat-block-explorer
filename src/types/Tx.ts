@@ -5,8 +5,9 @@ export type Tx = {
     chainId: number;
     confirmations: number;
     creates: any;
-    data: string;
+    data: Data;
     from: string;
+    to: string;
     gasLimit: number;
     gasUsed: string;
     hash: string;
@@ -14,4 +15,13 @@ export type Tx = {
     transactionIndex: number;
     type: number;
     value: string;
+    timestamp: number
 };
+
+type Data = {
+    args: [];
+    name: string;
+    sighash: string;
+    signature: string;
+    value: string;
+}

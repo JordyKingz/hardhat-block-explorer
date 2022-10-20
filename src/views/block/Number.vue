@@ -3,6 +3,7 @@ import {RouterLink, useRoute} from 'vue-router'
 import {ethers} from "ethers";
 import {onBeforeMount, reactive, ref} from "vue";
 import type {Block} from "@/types/Block";
+import Search from "@/components/Search.vue";
 
 const seconds = 1000;
 const minute = 1000 * 60;
@@ -61,20 +62,8 @@ function calculateGasPercentage(gasUsed: number, gasLimit: number) {
     <div class="mx-auto max-w-7xl">
       <div class="py-12 w-1/2">
         <RouterLink to="/">Home</RouterLink>
-
         <div>
           <h2 class="text-2xl font-medium">Local Block Explorer</h2>
-        </div>
-        <div class="mt-4 grid grid-cols-3 gap-2">
-          <div class="col-span-2">
-            <input
-                type="text"
-                placeholder="Search by Address / Txn Hash / Block / Token"
-                class="w-full bg-gray-800 rounded-md border py-2 text-lg px-5 border-gray-900 outline-none focus:ring-purple-500">
-          </div>
-          <div>
-            <button class="bg-gray-800 opacity-75 hover:bg-gray-400 hover:text-gray-900 rounded-md border py-2 px-4 font-medium text-lg border-gray-900">Search</button>
-          </div>
         </div>
       </div>
       <div v-if="state.ready" class="mt-2">
@@ -82,7 +71,6 @@ function calculateGasPercentage(gasUsed: number, gasLimit: number) {
           Latest Block:
           <span class="text-xl text-gray-400">#{{block.number}}</span>
         </h3>
-
         <div class="mt-2 w-full bg-gray-800 px-4 py-3 rounded-lg">
           <div class="grid grid-cols-4 gap-4">
             <div class="col-span-1">
@@ -107,7 +95,7 @@ function calculateGasPercentage(gasUsed: number, gasLimit: number) {
               Mined By
             </div>
             <div class="col-span-3">
-              <RouterLink :to="{name: 'address', params: {address: block.miner}}" class="text-purple-500 hover:text-purple-400">
+              <RouterLink :to="{name: 'address', params: {address: block.miner}}" class="text-blue-500 hover:text-purple-500">
                 {{block.miner}}
               </RouterLink>
             </div>
@@ -134,21 +122,31 @@ function calculateGasPercentage(gasUsed: number, gasLimit: number) {
           <hr class="my-4 border-gray-500">
           <div class="grid grid-cols-4 gap-4">
             <div class="col-span-1">
-              Hash
+              Transactions
             </div>
             <div class="col-span-3">
-              {{ block.hash }}
+              <div v-for="(tx, key) in block.transactions" :key="key" class="block">
+                <RouterLink :to="{name: 'tx', params: {hash: tx}}">
+                <span class="text-blue-500 hover:text-purple-500">
+                  {{ tx }}
+                </span>
+                </RouterLink>
+              </div>
             </div>
           </div>
-          <hr class="my-4 border-gray-500">
-          <div class="grid grid-cols-4 gap-4">
-            <div class="col-span-1">
-              Parent Hash
-            </div>
-            <div class="col-span-3">
-              {{ block.parentHash}}
-            </div>
-          </div>
+<!--          <hr class="my-4 border-gray-500">-->
+<!--          <div class="grid grid-cols-4 gap-4">-->
+<!--            <div class="col-span-1">-->
+<!--              Parent Hash-->
+<!--            </div>-->
+<!--            <div class="col-span-3">-->
+<!--              <RouterLink :to="{name: 'tx', params: {hash: block.parentHash}}">-->
+<!--                <span class="text-purple-500 hover:text-purple-400">-->
+<!--                  {{block.parentHash}}-->
+<!--                </span>-->
+<!--              </RouterLink>-->
+<!--            </div>-->
+<!--          </div>-->
           <hr class="my-4 border-gray-500">
           <div class="grid grid-cols-4 gap-4">
             <div class="col-span-1">

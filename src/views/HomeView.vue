@@ -1,16 +1,15 @@
 <script setup lang="ts">
-import { RouterLink } from 'vue-router'
+import {RouterLink, useRouter} from 'vue-router'
 import {ethers} from "ethers";
 import {onBeforeMount, reactive, ref} from "vue";
 import type {Block} from "@/types/Block";
+import Search from "@/components/Search.vue";
 
 const seconds = 1000;
 const minute = 1000 * 60;
 let state = reactive({
   ready: false,
 });
-
-let latestBlockTimestamp = ref('');
 
 let chain = reactive({latestBlocks: <Block[]>[], latestTransactions: []});
 // @ts-ignore
@@ -58,16 +57,12 @@ function timePassed(timestamp: number) {
   const timePassed = new Date().getTime() - date.getTime();
 
   if (timePassed / minute < 1) {
-    latestBlockTimestamp.value = "just now";
     return "just now";
   } else if (timePassed / minute < 60) {
-    latestBlockTimestamp.value = Math.floor(timePassed / minute) + " minutes ago";
     return Math.floor(timePassed / minute) + " minutes ago";
   } else if (timePassed / minute < 1440) {
-    latestBlockTimestamp.value = Math.floor(timePassed / minute) + " hours ago";
     return Math.floor(timePassed / minute / 60) + " hours ago";
   } else {
-    latestBlockTimestamp.value = Math.floor(timePassed / minute) + " days ago";
     return Math.floor(timePassed / minute / 1440) + " days ago";
   }
 }
@@ -76,6 +71,11 @@ function secondsPassed(timestamp: number) {
   const date = new Date(timestamp * 1000);
   const timePassed = new Date().getTime() - date.getTime();
   return Math.floor(timePassed / seconds);
+}
+
+function getBlockTimeStamp() {
+  const latest = chain.latestBlocks[0];
+  return timePassed(latest.timestamp);
 }
 
 function blockReward(block: Block) {
@@ -91,17 +91,7 @@ function blockReward(block: Block) {
       <div>
         <h2 class="text-2xl font-medium">Local Block Explorer</h2>
       </div>
-      <div class="mt-4 grid grid-cols-3 gap-2">
-        <div class="col-span-2">
-          <input
-              type="text"
-              placeholder="Search by Address / Txn Hash / Block / Token"
-              class="w-full bg-gray-800 rounded-md border py-2 text-lg px-5 border-gray-900 outline-none focus:ring-purple-500">
-        </div>
-        <div>
-          <button class="bg-gray-800 opacity-75 hover:bg-purple-500 hover:text-white rounded-md border py-2 px-4 font-medium text-lg border-gray-900">Search</button>
-        </div>
-      </div>
+      <Search />
     </div>
     <div v-if="state.ready" class="mt-2">
       <div class="grid grid-cols-2 gap-6">
@@ -130,7 +120,7 @@ function blockReward(block: Block) {
                 <div class="col-span-5">
                   <div class="flex">
                     Miner
-                      <RouterLink class="truncate" :to="{name: 'address', params: {address: block.miner}}">
+                      <RouterLink v-if="block.miner" class="truncate" :to="{name: 'address', params: {address: block.miner}}">
                         <span class="text-gray-500 pl-1 hover:text-purple-500">
                           {{block.miner}}
                         </span>
@@ -168,14 +158,14 @@ function blockReward(block: Block) {
                     </span>
                   </RouterLink>
                   <span class="text-xs block">
-                    {{ latestBlockTimestamp }}
+                    {{ getBlockTimeStamp() }}
                   </span>
                 </div>
                 <div class="col-span-5 truncate">
                   <div class="block">
                     <div class="flex">
                       From
-                      <RouterLink v-if="tx.from !== ''" class="truncate" :to="{name: 'address', params: {address: tx.from}}">
+                      <RouterLink v-if="tx.from && tx.from !== ''" class="truncate" :to="{name: 'address', params: {address: tx.from}}">
                         <span class="text-gray-500 pl-2 hover:text-purple-500">
                           {{tx.from}}
                         </span>
@@ -185,9 +175,14 @@ function blockReward(block: Block) {
                   <div class="block">
                     <div class="flex">
                       To
-                      <RouterLink v-if="tx.to !== ''" class="truncate" :to="{name: 'address', params: {address: tx.to}}">
+                      <RouterLink v-if="tx.to && tx.to !== ''" class="truncate" :to="{name: 'address', params: {address: tx.to}}">
                         <span class="text-gray-500 pl-2 hover:text-purple-500">
                           {{tx.to}}
+                        </span>
+                      </RouterLink>
+                      <RouterLink v-else-if="tx.creates && tx.creates !== ''" class="truncate" :to="{name: 'address', params: {address: tx.creates}}">
+                        <span class="text-gray-500 pl-2 hover:text-purple-500">
+                          {{tx.creates}}
                         </span>
                       </RouterLink>
                     </div>
@@ -195,8 +190,7 @@ function blockReward(block: Block) {
                 </div>
                 <div class="col-span-2">
                   <button class="px-2 py-1 mt-1 text-xs bg-gray-600 rounded-lg">
-<!--                    {{ parseEther(tx.value.toString())}}-->
-                    0.005ETH
+                    {{ ethers.utils.formatEther(tx.value.toString()) }} ETH
                   </button>
                 </div>
               </div>

@@ -7,6 +7,8 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+/public/*
+
 node_modules
 .DS_Store
 dist
@@ -26,3 +28,15 @@ coverage
 *.njsproj
 *.sln
 *.sw?
+
+node_modules
+.env
+coverage
+coverage.json
+typechain
+typechain-types
+
+#Hardhat files
+cache
+artifacts
+
