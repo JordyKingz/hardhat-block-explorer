@@ -34,11 +34,8 @@ onMounted(async () => {
 });
 
 async function getTxData() {
-  // const transaction = await provider.send("eth_getTransactionByHash", [`${route.params.hash}`]);
-  // console.log(transaction)
   // @ts-ignore
   const response =  await provider.getTransaction(`${route.params.hash}`);
-  console.log(response);
   // @ts-ignore
   return await provider.getTransaction(`${route.params.hash}`);
 }
@@ -92,10 +89,10 @@ async function parseTxData() {
 </script>
 
 <template>
-  <div v-if="state.ready">
+  <div>
     <div class="mx-auto max-w-7xl">
       <RouterLink to="/">Home</RouterLink>
-      <div class="mt-2">
+      <div v-if="state.ready" class="mt-2">
         <h3 class="text-gray-200 text-2xl">
           Transaction Details
         </h3>
