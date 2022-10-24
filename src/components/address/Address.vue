@@ -2,8 +2,7 @@
 import {RouterLink, useRoute} from 'vue-router'
 import {ethers} from "ethers";
 import {onBeforeMount, reactive, ref, watch} from "vue";
-import type {Tx} from "@/types/Tx";
-import router from "@/router";
+import type {Tx} from "../../types/Tx";
 
 const seconds = 1000;
 const minute = 1000 * 60;
@@ -12,14 +11,10 @@ let state = reactive({
 });
 
 const route = useRoute();
-const reactiveRoute = ref(route);
 // @ts-ignore
 const provider = new ethers.providers.Web3Provider(window.ethereum);
-const ethProvider = new ethers.providers.EtherscanProvider('homestead');
-// const ethProvider = new ethers.providers.JsonRpcProvider(`http://localhost:8545/`, 'homestead');
 
 let address = reactive({transactions: <Tx[]>[]});
-let contract = reactive({abi: []});
 let tx = ref({} as Tx);
 const balance = ref(0);
 const routerAddress = ref('');
@@ -48,7 +43,6 @@ async function checkAddress() {
 
 async function getTransactionsByAddress() {
   // @ts-ignore
-  // const transactions = await ethProvider.getHistory(`${route.params.address}`);
   const txCount = await provider.getTransactionCount(`${route.params.address}`, 'latest');
 
   if (txCount > 0) {
@@ -97,7 +91,6 @@ async function getTxAbi(tx: any) {
       }
     }
     catch(error){
-      console.log('error');
       console.log(error)
     }
   } else if (tx && tx.creates) {
