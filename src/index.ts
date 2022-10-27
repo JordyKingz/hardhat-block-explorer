@@ -1,5 +1,4 @@
 import { createWebHistory } from "vue-router";
-// src/index.ts
 import type { App, Plugin } from "vue";
 
 import * as _components from "./components";
@@ -30,7 +29,6 @@ export const Home = _home;
 export const Block = _block;
 export const Address = _address;
 export const Tx = _tx;
-
 
 const Explorer = {
     create: create,

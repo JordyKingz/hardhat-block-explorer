@@ -1,6 +1,6 @@
 {
   "name": "local-block-explorer",
-  "version": "0.0.15",
+  "version": "0.0.17",
   "files": [
     "dist"
   ],

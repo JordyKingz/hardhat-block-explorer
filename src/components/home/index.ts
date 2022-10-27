@@ -1,6 +1,6 @@
 import type { App, Plugin } from "vue";
 
-import Home from "./HomeView.vue";
+import Home from "./Home.vue";
 
 export default {
     install(Vue: App) {

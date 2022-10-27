@@ -1,6 +1,6 @@
 import type { App, Plugin } from "vue";
 
-import Tx from "./Hash.vue";
+import Tx from "./Tx.vue";
 
 export default {
     install(Vue: App) {
