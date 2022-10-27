@@ -1,4 +1,3 @@
-import { createWebHistory } from "vue-router";
 import type { App, Plugin } from "vue";
 
 import * as _components from "./components";

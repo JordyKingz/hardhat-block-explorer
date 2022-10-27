@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import {RouterLink, useRoute} from 'vue-router'
 import {ethers} from "ethers";
-import {onBeforeMount, reactive, ref, watch} from "vue";
-import type {Tx} from "../../types/Tx";
+import {onBeforeMount, reactive, ref} from "vue";
+import type {Tx} from "@/types/Tx";
 
 const seconds = 1000;
 const minute = 1000 * 60;

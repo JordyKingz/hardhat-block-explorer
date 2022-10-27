@@ -2,8 +2,8 @@
 import {RouterLink} from 'vue-router'
 import {ethers} from "ethers";
 import {onBeforeMount, reactive} from "vue";
-import type {Block} from "../../types/Block";
-import Search from "../search/Search.vue";
+import type {Block} from "@/types/Block";
+import Search from "@/components/search/Search.vue";
 
 const seconds = 1000;
 const minute = 1000 * 60;
