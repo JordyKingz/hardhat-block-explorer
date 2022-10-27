@@ -13,7 +13,7 @@ let state = reactive({
 const route = useRoute();
 // @ts-ignore
 const provider = new ethers.providers.Web3Provider(window.ethereum);
-
+// @ts-ignore
 let address = reactive({transactions: <Tx[]>[]});
 let tx = ref({} as Tx);
 const balance = ref(0);

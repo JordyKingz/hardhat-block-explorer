@@ -8,4 +8,6 @@ const app = createApp(App)
 // @ts-ignore
 app.use(router)
 
-app.mount('#app')
+app.mount('#explorer')
+
+export default app;
