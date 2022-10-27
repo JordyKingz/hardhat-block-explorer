@@ -9,9 +9,6 @@ export default defineConfig({
     {
       ...typescript({ tsconfig: './tsconfig.json' }),
       apply: 'build',
-      declaration: true,
-      declarationDir: 'types/',
-      rootDir: '/'
     },
     vue()
   ],
