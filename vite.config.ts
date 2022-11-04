@@ -26,7 +26,7 @@ export default defineConfig({
       fileName: (format) => `local-block-explorer.${format}.js`,
     },
     rollupOptions: {
-      input: "./src/index.ts",
+      input: path.resolve(__dirname, './src/index.ts'),
       // make sure to externalize deps that shouldn't be bundled
       // into your library
       external: ['vue', 'vue-router'],
