@@ -1,20 +1,21 @@
 <script setup lang="ts">
-import {RouterLink, useRouter} from 'vue-router'
+import {RouterLink} from 'vue-router'
 import {ethers} from "ethers";
-import {onBeforeMount, reactive, ref} from "vue";
-import type {Block} from "../types/Block";
-import Search from "./Search.vue";
+import {onBeforeMount, reactive} from "vue";
+import type {Block} from "@/types/Block";
+import Search from "@/components/search/Search.vue";
 
 const seconds = 1000;
 const minute = 1000 * 60;
 let state = reactive({
   ready: false,
 });
-
-let chain = reactive({latestBlocks: <Block[]>[], latestTransactions: []});
+// @ts-ignore
+let chain = reactive({latestBlocks: <Block>[], latestTransactions: []});
 // @ts-ignore
 const provider = new ethers.providers.Web3Provider(window.ethereum);
 
+console.log(provider)
 onBeforeMount(async () => {
   await getBlockchainData();
 });
@@ -74,12 +75,17 @@ function secondsPassed(timestamp: number) {
 }
 
 function getBlockTimeStamp() {
+  // @ts-ignore
   const latest = chain.latestBlocks[0];
   return timePassed(latest.timestamp);
 }
 
 function blockReward(block: Block) {
-  return `${Number(ethers.utils.formatEther(ethers.utils.parseUnits(block.gasUsed.toString(), 'gwei')).toString()).toFixed(5)}ETH`;
+  return `${Number(ethers.utils.formatEther(ethers.utils.parseUnits(block.gasUsed.toString(), 'gwei')).toString()).toFixed(5)} ETH`;
+}
+
+function parseEther(value: string) {
+  return Number(value).toFixed(5)
 }
 
 </script>
@@ -190,7 +196,7 @@ function blockReward(block: Block) {
                 </div>
                 <div class="col-span-2">
                   <button class="px-2 py-1 mt-1 text-xs bg-gray-600 rounded-lg">
-                    {{ ethers.utils.formatEther(tx.value.toString()) }} ETH
+                    {{ parseEther(ethers.utils.formatEther(tx.value.toString())) }} ETH
                   </button>
                 </div>
               </div>

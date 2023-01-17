@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import {RouterLink, useRoute} from 'vue-router'
 import {ethers} from "ethers";
-import {onBeforeMount, reactive, ref, watch} from "vue";
-import type {Tx} from "../../types/Tx";
+import {onBeforeMount, reactive, ref} from "vue";
+import type {Tx} from "@/types/Tx";
 
 const seconds = 1000;
 const minute = 1000 * 60;
@@ -13,7 +13,7 @@ let state = reactive({
 const route = useRoute();
 // @ts-ignore
 const provider = new ethers.providers.Web3Provider(window.ethereum);
-
+// @ts-ignore
 let address = reactive({transactions: <Tx[]>[]});
 let tx = ref({} as Tx);
 const balance = ref(0);

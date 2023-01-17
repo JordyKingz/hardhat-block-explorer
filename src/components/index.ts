@@ -1,4 +1,6 @@
-/* eslint-disable import/prefer-default-export */
+import Home from './home';
+import Block from './block';
+import Address from './address';
+import Tx from './tx';
 
-// @ts-ignore
-export { default as HomeView } from './HomeView.vue'
+export { Home, Block, Address, Tx };
