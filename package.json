@@ -1,31 +1,37 @@
 {
   "name": "local-block-explorer",
-  "version": "0.0.1",
-  "files": ["dist"],
-  "main": "./dist/local-block-explore.umd.js",
-  "module": "./dist/local-block-explore.es.js",
+  "version": "0.0.25",
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/local-block-explorer.umd.js",
+  "module": "./dist/local-block-explorer.es.js",
   "exports": {
     ".": {
       "import": "./dist/local-block-explorer.es.js",
       "require": "./dist/local-block-explorer.umd.js"
     }
   },
+  "types": "./dist/src/index.d.ts",
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc --noEmit && vite build",
+    "build": "vite build",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@rollup/plugin-typescript": "^9.0.2",
     "ethers": "^5.7.0",
+    "tslib": "^2.4.0",
     "vue": "^3.2.37",
     "vue-router": "^4.1.3"
   },
   "devDependencies": {
+    "@types/node": "^18.11.7",
     "@vitejs/plugin-vue": "^3.1.0",
     "autoprefixer": "^10.4.8",
-    "typescript": "^4.6.4",
     "postcss": "^8.4.16",
     "tailwindcss": "^3.1.8",
+    "typescript": "^4.6.4",
     "vite": "^3.1.0",
     "vue-tsc": "^0.40.4"
   }
