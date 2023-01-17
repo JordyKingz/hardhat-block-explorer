@@ -15,6 +15,7 @@ let chain = reactive({latestBlocks: <Block>[], latestTransactions: []});
 // @ts-ignore
 const provider = new ethers.providers.Web3Provider(window.ethereum);
 
+console.log(provider)
 onBeforeMount(async () => {
   await getBlockchainData();
 });
@@ -80,7 +81,11 @@ function getBlockTimeStamp() {
 }
 
 function blockReward(block: Block) {
-  return `${Number(ethers.utils.formatEther(ethers.utils.parseUnits(block.gasUsed.toString(), 'gwei')).toString()).toFixed(5)}ETH`;
+  return `${Number(ethers.utils.formatEther(ethers.utils.parseUnits(block.gasUsed.toString(), 'gwei')).toString()).toFixed(5)} ETH`;
+}
+
+function parseEther(value: string) {
+  return Number(value).toFixed(5)
 }
 
 </script>
@@ -191,7 +196,7 @@ function blockReward(block: Block) {
                 </div>
                 <div class="col-span-2">
                   <button class="px-2 py-1 mt-1 text-xs bg-gray-600 rounded-lg">
-                    {{ ethers.utils.formatEther(tx.value.toString()) }} ETH
+                    {{ parseEther(ethers.utils.formatEther(tx.value.toString())) }} ETH
                   </button>
                 </div>
               </div>
